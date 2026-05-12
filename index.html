@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
@@ -22,16 +23,31 @@
                 <!-- Subtle stabilized light effect behind button -->
                 <div class="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full scale-150 group-hover:bg-purple-500/30 transition-colors"></div>
                 <div id="g_id_onload"
-                     data-client_id="722211810013-j3pmc5f0abkqhkeqi0cdl8euu5fs7rem.apps.googleusercontent.com"
-                     data-callback="handleCredentialResponse">
+                    data-client_id="{{ google_client_id }}"
+                    data-callback="handleCredentialResponse"
+                    data-ux_mode="popup"
+                    data-auto_select="false"
+                    data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin relative z-10" data-type="standard" data-theme="filled_blue" data-size="large" data-text="signin_with" data-shape="pill" data-logo_alignment="left"></div>
+                <div class="g_id_signin relative z-10" 
+                    data-type="standard" 
+                    data-theme="outline" 
+                    data-size="large" 
+                    data-text="continue_with" 
+                    data-shape="pill" 
+                    data-logo_alignment="left"
+                    data-width="280">
+                </div>
             </div>
+
+            <button id="guest-login-btn" class="relative z-10 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+                Continue as Guest (Demo)
+            </button>
         </div>
     </div>
 
     <!-- Hidden Dashboard Layout -->
-    <div id="dashboard-app" class="hidden flex min-h-screen opacity-0 transition-opacity duration-1000">
+    <div id="dashboard-app" class="hidden min-h-screen opacity-0 transition-opacity duration-1000">
         <!-- Navigation Sidebar -->
         <aside id="sidebar" class="glass-sidebar w-64 sidebar-transition hidden md:flex flex-col sticky top-0 h-screen p-6 z-30 relative">
             <!-- Floating Chevron Collapser -->
@@ -46,33 +62,33 @@
             
             <nav class="flex-grow space-y-4">
                 <a href="#" class="sidebar-link active flex items-center gap-4 py-2 px-1 rounded-lg" data-page="dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span class="sidebar-label">Dashboard</span></a>
-                <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="vault"><i data-lucide="shield-check" class="w-5 h-5"></i> <span class="sidebar-label">The Vault</span></a>
                 <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="exchange"><i data-lucide="repeat" class="w-5 h-5"></i> <span class="sidebar-label">Exchange Hub</span></a>
+                <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="vault"><i data-lucide="shield" class="w-5 h-5"></i> <span class="sidebar-label">Secure Vault</span></a>
                 <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="analytics"><i data-lucide="bar-chart-3" class="w-5 h-5"></i> <span class="sidebar-label">Analytics</span></a>
                 <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="ai"><i data-lucide="sparkles" class="w-5 h-5"></i> <span class="sidebar-label">AI Assistant</span></a>
             </nav>
 
             <div class="pt-6 border-t border-white/10 flex flex-col gap-4">
                 <a href="#" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg" data-page="settings"><i data-lucide="settings" class="w-5 h-5"></i> <span class="sidebar-label">Settings</span></a>
+                <a href="#" id="sign-out-btn" class="sidebar-link flex items-center gap-4 py-2 px-1 rounded-lg text-red-400 hover:text-red-300" title="Sign Out">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> 
+                    <span class="sidebar-label">Sign Out</span>
+                </a>
             </div>
         </aside>
 
         <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 relative z-10">
             <!-- Top Navigation Bar -->
             <header class="h-20 flex justify-between items-center px-4 md:px-8 border-b border-white/5 bg-white/5 backdrop-blur-sm sticky top-0 z-20">
                 <div class="flex items-center gap-4">
-                    <button class="md:hidden text-2xl">☰</button>
+                    <button id="mobile-menu-toggle" class="md:hidden text-white text-2xl">☰</button>
                     <div class="hidden md:block text-sm text-gray-400">Welcome back, <span class="text-white font-medium">Student</span></div>
                 </div>
                 <div class="flex items-center gap-6">
                     <!-- Theme Toggle -->
                     <button id="theme-toggle" class="p-2 hover:bg-white/10 rounded-full transition-colors" title="Toggle Light/Dark Mode"><i data-lucide="moon" id="theme-icon" class="w-5 h-5 text-gray-400"></i></button>
-                    <div id="g_id_onload"
-                         data-client_id="722211810013-j3pmc5f0abkqhkeqi0cdl8euu5fs7rem.apps.googleusercontent.com"
-                         data-callback="handleCredentialResponse">
-                    </div>
-                    <div class="g_id_signin" data-type="standard"></div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 border border-white/20"></div>
                 </div>
             </header>
 
@@ -142,36 +158,8 @@
                     </div>
                 </div>
 
-                <!-- 2. The Vault Page (Hidden by default) -->
-                <div id="page-vault" class="page-view hidden space-y-6">
-                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                            <div>
-                                <h2 class="text-3xl font-bold text-white mb-2">The Vault</h2>
-                                <p class="text-slate-400">Manage your secure financial and academic documents.</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="file" id="vault-upload-input" class="hidden" accept="image/*,.pdf">
-                                <button onclick="document.getElementById('vault-upload-input').click()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition flex items-center gap-2 shadow-lg shadow-blue-900/20">
-                                    <i data-lucide="upload" class="w-4 h-4"></i>
-                                    Upload File
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="vault-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Files will be rendered here -->
-                        </div>
-                        
-                        <div id="vault-empty-state" class="hidden flex flex-col items-center justify-center py-20 text-slate-500">
-                            <i data-lucide="folder-open" class="w-12 h-12 mb-4 opacity-20"></i>
-                            <p>No documents found in your vault.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Exchange Hub Page (Placeholder) -->
-                <div id="page-exchange" class="page-view hidden">
+                <!-- 2. Exchange Hub Page -->
+                <div id="page-exchange" class="page-view hidden space-y-8">
                     <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl space-y-8">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
@@ -192,7 +180,13 @@
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <input type="text" id="exchange-title" placeholder="Item Name (e.g., Economics 101 Textbook)" class="glass-input p-3 rounded-xl text-sm text-white">
-                                <input type="text" id="exchange-donor" placeholder="Your Name/Contact" class="glass-input p-3 rounded-xl text-sm text-white">
+                                <select id="exchange-type" class="glass-input p-3 rounded-xl text-sm text-white bg-[#1e293b]">
+                                    <option value="Borrow">Borrow (Free - 5 Days)</option>
+                                    <option value="Rent">Rent (10 Days - 30% Price)</option>
+                                    <option value="Buy">Buy (Full Price)</option>
+                                </select>
+                                <input type="number" id="exchange-price" placeholder="Base Price (INR)" class="glass-input p-3 rounded-xl text-sm text-white">
+                                <input type="text" id="exchange-donor" placeholder="Your Name" class="glass-input p-3 rounded-xl text-sm text-white">
                                 <div class="md:col-span-2">
                                     <label class="block text-xs text-gray-400 mb-2">Item Photo (Optional)</label>
                                     <input type="file" id="exchange-file-input" class="text-xs text-gray-400 w-full" accept="image/*">
@@ -206,6 +200,65 @@
 
                         <div id="exchange-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             <!-- Exchange items will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Vault Page -->
+                <div id="page-vault" class="page-view hidden space-y-8">
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl space-y-8">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h2 class="text-3xl font-bold text-white mb-2">Secure Vault</h2>
+                                <p class="text-slate-400">Store and manage your academic and financial documents.</p>
+                            </div>
+                            <label class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition flex items-center gap-2 shadow-lg shadow-blue-900/20 cursor-pointer">
+                                <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                                Upload Document
+                                <input type="file" id="vault-upload-input" class="hidden" onchange="uploadVaultItem(this)">
+                            </label>
+                        </div>
+                        <div id="vault-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Analytics Page -->
+                <div id="page-analytics" class="page-view hidden space-y-6">
+                    <div class="glass-card p-8 rounded-2xl shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <i data-lucide="bar-chart-3" class="w-8 h-8 text-blue-400"></i>
+                            Risk Methodology
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-blue-300">The system analyzes:</h3>
+                                <ul class="space-y-2 text-slate-300">
+                                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Attendance</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Fee payment delays</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Academic performance</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Family income</li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Student feedback</li>
+                                </ul>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-blue-300">Then predicts whether a student is:</h3>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span class="font-medium text-green-400">Low Risk</span>
+                                    </div>
+                                    <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center gap-3">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                        <span class="font-medium text-yellow-400">Medium Risk</span>
+                                    </div>
+                                    <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                        <span class="font-medium text-red-400">High Risk</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -231,6 +284,39 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Mock UPI Payment Modal -->
+    <div id="upi-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-md border-white/20 animate-in zoom-in-95 duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Secure Checkout</h3>
+                <button onclick="closeUPIModal()" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+            </div>
+            <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-xl mb-6">
+                <p class="text-xs text-blue-400 uppercase font-bold tracking-widest mb-1">Total Amount</p>
+                <div class="text-3xl font-black text-white" id="upi-amount">₹0.00</div>
+                <p class="text-[10px] text-gray-400 mt-2" id="upi-meta"></p>
+            </div>
+            <div class="space-y-3 mb-8">
+                <p class="text-xs font-medium text-gray-400">Select UPI App</p>
+                <label class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="upi-provider" value="GPay" checked class="accent-blue-500">
+                    <span class="text-sm font-medium text-white">Google Pay</span>
+                </label>
+                <label class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="upi-provider" value="PhonePe" class="accent-blue-500">
+                    <span class="text-sm font-medium text-white">PhonePe</span>
+                </label>
+                <label class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="upi-provider" value="Paytm" class="accent-blue-500">
+                    <span class="text-sm font-medium text-white">Paytm</span>
+                </label>
+            </div>
+            <button id="confirm-payment-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/20">
+                CONFIRM TRANSACTION
+            </button>
         </div>
     </div>
 
